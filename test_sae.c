@@ -60,17 +60,17 @@ void INSCRIRE(Promotion *p, const char nom, const char* prenom) {
 void ETUDIANTS(const Promotion *p) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		const Etudiant *e = &p->etudiants[i];
-		printf("%d %s %s %s\n", i + 1, e.nom, e.prenom, e.etat); 
+		printf("%d - %s %s - %s\n", i + 1, e->nom, e->prenom, e->etat); 
 	}
 }
 
-void DEMISSION(Promotion p, int id) {
+void DEMISSION(Promotion *p, int id) {
 	if (id < 1 || id > p->nbEtudiants) {
 		printf("Identifiant incorrect\n");
 		return;
 	}
 
-	Etudiant e = &p->etudiants[id]; // -1 car tableau commence à 0
+	Etudiant *e = &p->etudiants[id]; // -1 car tableau commence à 0
 
 	if (strcmp(e->etat, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -81,13 +81,13 @@ void DEMISSION(Promotion p, int id) {
 	printf("Demission enregistree\n");
 }
 
-void DEFAILLANCE(Promotion p, int id) {
+void DEFAILLANCE(Promotion *p, int id) {
 	if (id < 1 || id > p->nbEtudiants) {
 		printf("Identifiant incorrect\n");
 		return;
 	}
 
-	Etudiant e = &p->etudiants[id - 1];
+	Etudiant *e = &p->etudiants[id - 1];
 
 	if (strcmp(e->etat, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -113,7 +113,7 @@ int main() {
 	char cde[MAX_CHAR] = " ";
 	do {
 		scanf("%s", cde);
-		else if (strcmp(cde, "INSCRIRE") == 0) { // C1 
+		if (strcmp(cde, "INSCRIRE") == 0) { // C1 
 			char nom[MAX_CHAR];
 			char prenom[MAX_CHAR];
 			scanf("%s %s", nom, prenom);
