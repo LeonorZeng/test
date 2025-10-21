@@ -34,39 +34,33 @@ void EXIT() {
 	EXIT(0);
 }*/
 
-void INSCRIRE(Promotion p, const charnom, const char* prenom) {
-}for (int i = 0; i < p->nbEtudiants; ++i) {
-	if (strcmp(p->etudiants[i].nom, nom) == 0 &&
-		strcmp(p->etudiants[i].prenom, prenom) == 0) {
-		printf("Nom incorrect\n");
-		return;
-	}
-}
-}
-Etudiant* e = &p->etudiants[p->nbEtudiants];
-
-strcpy(e->nom, nom);
-strcpy(e->prenom, prenom);
-e->ans = S1;
-strcpy(e->etat, "en cours");
-
-
-for (int s = 0; s < NB_SEMESTRES + NB_ANNEE; s++) {
-	for (int i = 0; i < NB_UE; i++) {
-		e->notes[s][i] = -1.f;
-	}
-}
-
-
-p->nbEtudiants++;
-printf("Inscription enregistree (%d)\n", p->nbEtudiants);
-
-
-
-void ETUDIANTS(const Promotion p) {
+void INSCRIRE(Promotion *p, const char nom, const char* prenom) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
-		const Etudiante = &p->etudiants[i];
-		printf("%d %s %s %s\n", i + 1, e->nom, e->prenom, e->etat);
+		if (strcmp(p->etudiants[i].nom, nom) == 0 && strcmp(p->etudiants[i].prenom, prenom) == 0) {
+			printf("Nom incorrect\n");
+			return;
+		}
+	}
+	Etudiant *e = &p->etudiants[p->nbEtudiants];
+
+	strcpy(p->etudiants[p->nbEtudiants].nom, nom);
+	strcpy(e->prenom, prenom);
+	e->ans = S1;
+	strcpy(e->etat, "en cours");
+
+
+	Init_tabNotes(&p, p->nbEtudiants);
+
+
+	p->nbEtudiants++;
+	printf("Inscription enregistree (%d)\n", p->nbEtudiants);
+}
+
+
+void ETUDIANTS(const Promotion *p) {
+	for (int i = 0; i < p->nbEtudiants; ++i) {
+		const Etudiant *e = &p->etudiants[i];
+		printf("%d %s %s %s\n", i + 1, e.nom, e.prenom, e.etat); 
 	}
 }
 
@@ -76,7 +70,7 @@ void DEMISSION(Promotion p, int id) {
 		return;
 	}
 
-	Etudiante = &p->etudiants[id - 1]; // -1 car tableau commence à 0
+	Etudiant e = &p->etudiants[id]; // -1 car tableau commence à 0
 
 	if (strcmp(e->etat, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -93,7 +87,7 @@ void DEFAILLANCE(Promotion p, int id) {
 		return;
 	}
 
-	Etudiante = &p->etudiants[id - 1];
+	Etudiant e = &p->etudiants[id - 1];
 
 	if (strcmp(e->etat, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -162,7 +156,7 @@ int main() {
 		else if (strcmp(cde, "DEMISSION") == 0) { // C5
 								int id;
 								scanf("%d", &id);
-								DEMISSION(&p, id);
+								DEMISSION(&p, id-1);
 								}
 								{
 								} // TODO
@@ -180,6 +174,16 @@ int main() {
 		{
 		} // TODO
 } while (strcmp(cde, "EXIT") != 0); // C0
+
+
+//verifie que l'identifiant utilisateur est correct
+int Verifie_id(Promotion* promo, int id) {
+	if (id < 1 || id > promo->nbEtudiants) {
+		printf("Identifiant incorrect\n");
+		return 0;
+	}
+	else
+		return 1;
 }
 
 //initilialise le tableau de note d'un etudiant avec la valeur -1
