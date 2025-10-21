@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 #pragma warning(disable: 4996 6031)
 
 enum {
@@ -33,24 +34,83 @@ void EXIT() {
 	EXIT(0);
 }*/
 
-void INSCRIRE(char nom[], char prenom[]) {
-	for (int i = 0; i < nbEtudiants; i++) {
-		if (strcmp(etudiant[i].nom, nom) == 0 && strcmp(etudiant[i].prenom, prenom) == 0) {
-			printf("Nom incorrect\n");
-		}
+void INSCRIRE(Promotion p, const charnom, const char* prenom) {
+}for (int i = 0; i < p->nbEtudiants; ++i) {
+	if (strcmp(p->etudiants[i].nom, nom) == 0 &&
+		strcmp(p->etudiants[i].prenom, prenom) == 0) {
+		printf("Nom incorrect\n");
+		return;
+	}
+}
+}
+Etudiant* e = &p->etudiants[p->nbEtudiants];
+
+strcpy(e->nom, nom);
+strcpy(e->prenom, prenom);
+e->ans = S1;
+strcpy(e->etat, "en cours");
+
+
+for (int s = 0; s < NB_SEMESTRES + NB_ANNEE; s++) {
+	for (int i = 0; i < NB_UE; i++) {
+		e->notes[s][i] = -1.f;
 	}
 }
 
-void ETUDIANT;
+
+p->nbEtudiants++;
+printf("Inscription enregistree (%d)\n", p->nbEtudiants);
+
+
+
+void ETUDIANTS(const Promotion p) {
+	for (int i = 0; i < p->nbEtudiants; ++i) {
+		const Etudiante = &p->etudiants[i];
+		printf("%d %s %s %s\n", i + 1, e->nom, e->prenom, e->etat);
+	}
+}
+
+void DEMISSION(Promotion p, int id) {
+	if (id < 1 || id > p->nbEtudiants) {
+		printf("Identifiant incorrect\n");
+		return;
+	}
+
+	Etudiante = &p->etudiants[id - 1]; // -1 car tableau commence à 0
+
+	if (strcmp(e->etat, "en cours") != 0) {
+		printf("Etudiant hors formation\n");
+		return;
+	}
+
+	strcpy(e->etat, "demission");
+	printf("Demission enregistree\n");
+}
+
+void DEFAILLANCE(Promotion p, int id) {
+	if (id < 1 || id > p->nbEtudiants) {
+		printf("Identifiant incorrect\n");
+		return;
+	}
+
+	Etudiante = &p->etudiants[id - 1];
+
+	if (strcmp(e->etat, "en cours") != 0) {
+		printf("Etudiant hors formation\n");
+		return;
+	}
+
+	strcpy(e->etat, "defaillance");
+	printf("Defaillance enregistree\n");
+}
 
 
 
 
 
 
-
-void CURSUS(Etudiant* etudiant, int id);
-void NOTE(Etudiant* etudiant, int ue, float note);
+void CURSUS(Etudiant * etudiant, int id);
+void NOTE(Etudiant * etudiant, int ue, float note);
 
 int main() {
 	Promotion p;
@@ -59,13 +119,13 @@ int main() {
 	char cde[MAX_CHAR] = " ";
 	do {
 		scanf("%s", cde);
-		if (strcmp(cde, "INSCRIRE") == 0) { // C1 
+		else if (strcmp(cde, "INSCRIRE") == 0) { // C1 
 			char nom[MAX_CHAR];
 			char prenom[MAX_CHAR];
 			scanf("%s %s", nom, prenom);
-			inscrire(nom, prenom);
-
-		}
+			INSCRIRE(&p, nom, prenom);
+}
+	}
 
 		else if (strcmp(cde, "NOTE") == 0) { // C2
 			int nb, competence;
@@ -82,35 +142,44 @@ int main() {
 				printf("Etudiant hors formation");
 			else
 				NOTE(&p.etudiants[nb], competence, note);
-		}
+				}
 
 		else if (strcmp(cde, "CURSUS") == 0) {// C3
-			int nb;
-			scanf("%u", &nb);
-			//Test pour voir si l'etudiant est enregistrer
-			//Peut-être creer une fonction pour ça
-			if (nb > p.nbEtudiants)
-				printf("Identifiant incorrect");
-			else
-				CURSUS(&p.etudiants[nb], nb);
-		}
-
-		else if (strcmp(cde, "ETUDIANTS") == 0) // C4
-		{
-		} // TODO
-		else if (strcmp(cde, "DEMISSION") == 0) // C5
-		{
-		} // TODO
-		else if (strcmp(cde, "DEFAILLANCE") == 0) // C6
-		{
-		} // TODO
+					int nb;
+					scanf("%u", &nb);
+					//Test pour voir si l'etudiant est enregistrer
+					//Peut-être creer une fonction pour ça
+					if (nb > p.nbEtudiants)
+						printf("Identifiant incorrect");
+					else
+						CURSUS(&p.etudiants[nb], nb);
+						}
+		else if (strcmp(cde, "ETUDIANTS") == 0) { // C4
+							ETUDIANTS(&p);
+							}
+							{
+							} // TODO
+		else if (strcmp(cde, "DEMISSION") == 0) { // C5
+								int id;
+								scanf("%d", &id);
+								DEMISSION(&p, id);
+								}
+								{
+								} // TODO
+		else if (strcmp(cde, "DEFAILLANCE") == 0) { // C6
+									int id;
+									scanf("%d", &id);
+									DEFAILLANCE(&p, id);
+									}
+									{
+									} // TODO
 		else if (strcmp(cde, "JURY") == 0) // C7
 		{
 		} // TODO
 		else if (strcmp(cde, "BILAN") == 0) // C8
 		{
 		} // TODO
-	} while (strcmp(cde, "EXIT") != 0); // C0
+} while (strcmp(cde, "EXIT") != 0); // C0
 }
 
 //initilialise le tableau de note d'un etudiant avec la valeur -1
@@ -126,13 +195,13 @@ void Init_tabNotes(Promotion* promo, int nb) {
 //ajoute la note d'un etudiant pour une UE
 void NOTE(Etudiant* etudiant, int ue, float note) {
 	//Verifie si la note et l'UE donner sont correctes (peut-être le mettre dans le main)
-	if (ue < 1 || ue > 6)
-		printf("UE incorrecte");
-	else if (note < NOTE_MIN || note > NOTE_MAX)
-		printf("Note incorrecte");
+	if (ue < 1 or ue > 6)
+		printf("UE incorrecte")
+	else if (note < NOTE_MIN or note > NOTE_MAX)
+		printf("Note incorrecte")
 	else {
 		etudiant->notes[etudiant->ans][ue] = note;
-		printf("Note enregistree");
+		printf("Note enregistree")
 	}
 }
 
@@ -163,3 +232,4 @@ void CURSUS(Etudiant* etudiant, int id) {
 	}
 	printf("%s \n", etudiant->etat);
 }
+
