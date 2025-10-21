@@ -118,8 +118,7 @@ int main() {
 			char prenom[MAX_CHAR];
 			scanf("%s %s", nom, prenom);
 			INSCRIRE(&p, nom, prenom);
-}
-	}
+		}
 
 		else if (strcmp(cde, "NOTE") == 0) { // C2
 			int nb, competence;
@@ -151,22 +150,19 @@ int main() {
 		else if (strcmp(cde, "ETUDIANTS") == 0) { // C4
 							ETUDIANTS(&p);
 							}
-							{
-							} // TODO
+
 		else if (strcmp(cde, "DEMISSION") == 0) { // C5
 								int id;
 								scanf("%d", &id);
 								DEMISSION(&p, id-1);
 								}
-								{
-								} // TODO
+
 		else if (strcmp(cde, "DEFAILLANCE") == 0) { // C6
 									int id;
 									scanf("%d", &id);
 									DEFAILLANCE(&p, id);
 									}
-									{
-									} // TODO
+
 		else if (strcmp(cde, "JURY") == 0) // C7
 		{
 		} // TODO
@@ -177,7 +173,7 @@ int main() {
 
 
 //verifie que l'identifiant utilisateur est correct
-int Verifie_id(Promotion* promo, int id) {
+int Verifie_id(Promotion * promo, int id){
 	if (id < 1 || id > promo->nbEtudiants) {
 		printf("Identifiant incorrect\n");
 		return 0;
@@ -213,8 +209,7 @@ void NOTE(Etudiant* etudiant, int ue, float note) {
 void CURSUS(Etudiant* etudiant, int id) {
 	printf("%u %s %s \n", id, etudiant->nom, etudiant->prenom);
 	Annee semestre = etudiant->ans;
-	Annee s = S1;
-	for (; s <= semestre; ++s) {
+	for (Annee s = S1; s <= semestre; ++s) {
 		for (int i = 0; i < NB_UE; ++i) {
 			float note = etudiant->notes[s][i];
 			Code c = etudiant->codes[s][i];
@@ -234,6 +229,6 @@ void CURSUS(Etudiant* etudiant, int id) {
 			}
 		}
 	}
-	printf("%s \n", etudiant->etat);
+	//printf("%d \n", etudiant->etat);
 }
 
