@@ -76,7 +76,7 @@ void DEFAILLANCE(Promotion* p, int id) {
 
 int Verifie_id(Promotion* promo, int id);
 
-void INSCRIRE(Promotion* p, const char nom, const char* prenom);
+void INSCRIRE(Promotion* p, const char* nom, const char* prenom);
 void CURSUS(Etudiant* etudiant, int id);
 void NOTE(Etudiant* etudiant, int ue, float note);
 
@@ -166,7 +166,7 @@ void Init_tabNotes(Promotion* promo, int nb) {
 	}
 }
 
-void INSCRIRE(Promotion* p, const char nom, const char* prenom) {
+void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		if (strcmp(p->etudiants[i].nom, nom) == 0 && strcmp(p->etudiants[i].prenom, prenom) == 0) {
 			printf("Nom incorrect\n");
@@ -175,7 +175,7 @@ void INSCRIRE(Promotion* p, const char nom, const char* prenom) {
 	}
 	Etudiant* e = &p->etudiants[p->nbEtudiants];
 
-	strcpy(p->etudiants[p->nbEtudiants].nom, nom);
+	strcpy(e->nom, nom);
 	strcpy(e->prenom, prenom);
 	e->ans = S1;
 	strcpy(e->etat, "en cours");
