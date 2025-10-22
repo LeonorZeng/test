@@ -60,7 +60,7 @@ void DEFAILLANCE(Promotion* p, int id) {
 		return;
 	}
 
-	Etudiant* e = &p->etudiants[id - 1];
+	Etudiant* e = &p->etudiants[id-1];
 
 	if (strcmp(e->etat, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -102,13 +102,13 @@ int main() {
 			scanf("%u", &competence);
 			scanf("%f", &note);
 			//Test pour voir si l'etudiant est enregistrer
-			if (nb > p.nbEtudiants)
+			if (nb-1 > p.nbEtudiants)
 				printf("Identifiant incorrect\n");
 			//Test pour voir si l'étudiant etudit toujours à l'IUT
 			else if (strcmp(p.etudiants[nb].etat, "en cours") != 0)
 				printf("Etudiant hors formation\n");
 			else
-				NOTE(&p.etudiants[nb], competence, note);
+				NOTE(&p.etudiants[nb-1], competence, note);
 		}
 
 		else if (strcmp(cde, "CURSUS") == 0) {// C3
@@ -119,7 +119,7 @@ int main() {
 			if (nb > p.nbEtudiants)
 				printf("Identifiant incorrect");
 			else
-				CURSUS(&p.etudiants[nb], nb);
+				CURSUS(&p.etudiants[nb-1], nb);
 		}
 		else if (strcmp(cde, "ETUDIANTS") == 0) { // C4
 			ETUDIANTS(&p);
@@ -173,6 +173,7 @@ void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 			return;
 		}
 	}
+
 	Etudiant* e = &p->etudiants[p->nbEtudiants];
 
 	strcpy(e->nom, nom);
@@ -181,7 +182,7 @@ void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 	strcpy(e->etat, "en cours");
 
 
-	Init_tabNotes(&p, p->nbEtudiants);
+	Init_tabNotes(p, p->nbEtudiants);
 
 
 	p->nbEtudiants++;
