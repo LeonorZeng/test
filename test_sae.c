@@ -103,10 +103,10 @@ int main() {
 			scanf("%f", &note);
 			//Test pour voir si l'etudiant est enregistrer
 			if (nb > p.nbEtudiants)
-				printf("Identifiant incorrect");
+				printf("Identifiant incorrect\n");
 			//Test pour voir si l'étudiant etudit toujours à l'IUT
 			else if (strcmp(p.etudiants[nb].etat, "en cours") != 0)
-				printf("Etudiant hors formation");
+				printf("Etudiant hors formation\n");
 			else
 				NOTE(&p.etudiants[nb], competence, note);
 		}
@@ -193,12 +193,12 @@ void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 void NOTE(Etudiant* etudiant, int ue, float note) {
 	//Verifie si la note et l'UE donner sont correctes (peut-être le mettre dans le main)
 	if (ue < 1 || ue > 6)
-		printf("UE incorrecte");
+		printf("UE incorrecte\n");
 	else if (note < NOTE_MIN || note > NOTE_MAX)
-		printf("Note incorrecte");
+		printf("Note incorrecte\n");
 	else {
 		etudiant->notes[etudiant->ans][ue] = note;
-		printf("Note enregistree");
+		printf("Note enregistree\n");
 	}
 }
 
@@ -226,6 +226,6 @@ void CURSUS(Etudiant* etudiant, int id) {
 			}
 		}
 	}
-	//printf("%d \n", etudiant->etat);
+	printf("%d \n", etudiant->etat);
 }
 
