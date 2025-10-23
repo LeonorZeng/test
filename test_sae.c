@@ -13,7 +13,7 @@ enum {
 const float NOTE_MIN = 0.f, NOTE_MAX = 20.f;
 
 typedef enum { S1, S2, B1, S3, S4, B2, S5, S6, B3 } Annee; //pour definir chaque semestre et annee
-typedef enum { ADM, AJ } Code;
+typedef enum { ADM, AJ } Code; 
 
 typedef struct {
 	char prenom[MAX_CHAR];
@@ -30,55 +30,14 @@ typedef struct {
 } Promotion;
 
 
-void ETUDIANTS(const Promotion* p) {
-	for (int i = 0; i < p->nbEtudiants; ++i) {
-		const Etudiant* e = &p->etudiants[i];
-		printf("%d - %s %s - %s\n", i + 1, e->nom, e->prenom, e->etat);
-	}
-}
+int Verifie_id(Promotion* promo, int id); //verifie que l'identifiant utilisateur est correct
 
-void DEMISSION(Promotion* p, int id) {
-	if (id < 1 || id > p->nbEtudiants) {
-		printf("Identifiant incorrect\n");
-		return;
-	}
-
-	Etudiant* e = &p->etudiants[id]; // -1 car tableau commence à 0
-
-	if (strcmp(e->etat, "en cours") != 0) {
-		printf("Etudiant hors formation\n");
-		return;
-	}
-
-	strcpy(e->etat, "demission");
-	printf("Demission enregistree\n");
-}
-
-void DEFAILLANCE(Promotion* p, int id) {
-	if (id < 1 || id > p->nbEtudiants) {
-		printf("Identifiant incorrect\n");
-		return;
-	}
-
-	Etudiant* e = &p->etudiants[id-1];
-
-	if (strcmp(e->etat, "en cours") != 0) {
-		printf("Etudiant hors formation\n");
-		return;
-	}
-
-	strcpy(e->etat, "defaillance");
-	printf("Defaillance enregistree\n");
-}
-
-
-
-
-int Verifie_id(Promotion* promo, int id);
-
-void INSCRIRE(Promotion* p, const char* nom, const char* prenom);
-void CURSUS(Etudiant* etudiant, int id);
-void NOTE(Etudiant* etudiant, int ue, float note);
+void INSCRIRE(Promotion* p, const char* nom, const char* prenom); //initialise une nouvelle valeur etudiant
+void ETUDIANTS(const Promotion* p); //fait defiler la liste des etudiants
+void NOTE(Etudiant* etudiant, int ue, float note);//ajoute la note d'un etudiant pour une UE
+void CURSUS(Etudiant* etudiant, int id); //permet de voir tout le cursus d'un etudiant donc toutes ses notes depuis la premiere annee
+void DEMISSION(Promotion* p, int id); //change le statut d'un etudiant à demission
+void DEFAILLANCE(Promotion* p, int id); //change le statut d'un etudiant à defaillance
 
 int main() {
 	Promotion p;
@@ -102,10 +61,10 @@ int main() {
 			scanf("%u", &competence);
 			scanf("%f", &note);
 			//Test pour voir si l'etudiant est enregistrer
-			if (nb-1 > p.nbEtudiants)
+			if (nb-1 > p.nbEtudiants || nb == p.nbEtudiants+1)
 				printf("Identifiant incorrect\n");
 			//Test pour voir si l'étudiant etudit toujours à l'IUT
-			else if (strcmp(p.etudiants[nb].etat, "en cours") != 0)
+			else if (strcmp(p.etudiants[nb-1].etat, "en cours") != 0)
 				printf("Etudiant hors formation\n");
 			else
 				NOTE(&p.etudiants[nb-1], competence, note);
@@ -116,7 +75,7 @@ int main() {
 			scanf("%u", &nb);
 			//Test pour voir si l'etudiant est enregistrer
 			//Peut-être creer une fonction pour ça
-			if (nb > p.nbEtudiants)
+			if (nb < 1 || nb-1 > p.nbEtudiants)
 				printf("Identifiant incorrect");
 			else
 				CURSUS(&p.etudiants[nb-1], nb);
@@ -166,6 +125,7 @@ void Init_tabNotes(Promotion* promo, int nb) {
 	}
 }
 
+//initialise une nouvelle valeur etudiant
 void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		if (strcmp(p->etudiants[i].nom, nom) == 0 && strcmp(p->etudiants[i].prenom, prenom) == 0) {
@@ -189,6 +149,13 @@ void INSCRIRE(Promotion* p, const char* nom, const char* prenom) {
 	printf("Inscription enregistree (%d)\n", p->nbEtudiants);
 }
 
+//fait defiler la liste des etudiants
+void ETUDIANTS(const Promotion* p) {
+	for (int i = 0; i < p->nbEtudiants; ++i) {
+		const Etudiant* e = &p->etudiants[i];
+		printf("%d - %s %s - %s\n", i + 1, e->nom, e->prenom, e->etat);
+	}
+}
 
 //ajoute la note d'un etudiant pour une UE
 void NOTE(Etudiant* etudiant, int ue, float note) {
@@ -198,8 +165,12 @@ void NOTE(Etudiant* etudiant, int ue, float note) {
 	else if (note < NOTE_MIN || note > NOTE_MAX)
 		printf("Note incorrecte\n");
 	else {
-		etudiant->notes[etudiant->ans][ue] = note;
+		etudiant->notes[etudiant->ans][ue-1] = note;
 		printf("Note enregistree\n");
+		if (note >= 10)
+			etudiant->codes[etudiant->ans][ue-1] = ADM;
+		else if (note < 10)
+			etudiant->codes[etudiant->ans][ue-1] = AJ;
 	}
 }
 
@@ -227,6 +198,42 @@ void CURSUS(Etudiant* etudiant, int id) {
 			}
 		}
 	}
-	printf("%d \n", etudiant->etat);
+	printf("%s \n", etudiant->etat);
+}
+
+//change le statut d'un etudiant à demission
+void DEMISSION(Promotion* p, int id) {
+	if (id < 1 || id > p->nbEtudiants) {
+		printf("Identifiant incorrect\n");
+		return;
+	}
+
+	Etudiant* e = &p->etudiants[id - 1]; // -1 car tableau commence à 0
+
+	if (strcmp(e->etat, "en cours") != 0) {
+		printf("Etudiant hors formation\n");
+		return;
+	}
+
+	strcpy(e->etat, "demission");
+	printf("Demission enregistree\n");
+}
+
+//change le statut d'un etudiant à defaillance
+void DEFAILLANCE(Promotion* p, int id) {
+	if (id < 1 || id > p->nbEtudiants) {
+		printf("Identifiant incorrect\n");
+		return;
+	}
+
+	Etudiant* e = &p->etudiants[id - 1];
+
+	if (strcmp(e->etat, "en cours") != 0) {
+		printf("Etudiant hors formation\n");
+		return;
+	}
+
+	strcpy(e->etat, "defaillance");
+	printf("Defaillance enregistree\n");
 }
 
