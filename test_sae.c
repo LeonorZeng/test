@@ -75,9 +75,7 @@ int main() {
 			scanf("%u", &nb);
 			//Test pour voir si l'etudiant est enregistrer
 			//Peut-être creer une fonction pour ça
-			if (nb < 1 || nb-1 > p.nbEtudiants)
-				printf("Identifiant incorrect");
-			else
+			if (Verifie_id(&p, nb))
 				CURSUS(&p.etudiants[nb-1], nb);
 		}
 		else if (strcmp(cde, "ETUDIANTS") == 0) { // C4
@@ -107,7 +105,7 @@ int main() {
 
 //verifie que l'identifiant utilisateur est correct
 int Verifie_id(Promotion* promo, int id) {
-	if (id < 1 || id > promo->nbEtudiants) {
+	if (id - 1 > promo->nbEtudiants || id == promo->nbEtudiants + 1){
 		printf("Identifiant incorrect\n");
 		return 0;
 	}
@@ -179,13 +177,42 @@ void CURSUS(Etudiant* etudiant, int id) {
 	printf("%u %s %s \n", id, etudiant->nom, etudiant->prenom);
 	Annee semestre = etudiant->ans;
 	for (Annee s = S1; s <= semestre; ++s) {
+		switch (semestre){
+		case S1:
+			printf("S1 - ");
+			break;
+		case S2:
+			printf("S2 - ");
+			break;
+		case B1:
+			printf("B1 - ");
+			break;
+		case S3:
+			printf("S3 - ");
+			break;
+		case S4:
+			printf("S4 - ");
+			break;
+		case B2:
+			printf("B2 - ");
+			break;
+		case S5:
+			printf("S5 - ");
+			break;
+		case S6:
+			printf("S6 - ");
+			break;
+		case B3:
+			printf("B3 - ");
+			break;
+		}
 		for (int i = 0; i < NB_UE; ++i) {
 			float note = etudiant->notes[s][i];
 			Code c = etudiant->codes[s][i];
 			if (note == -1)
-				printf("* - ");
+				printf("* ");
 			else
-				printf("%.1f - ", floorf(note * 10.f) / 10.f);
+				printf("%.1f ", floorf(note * 10.f) / 10.f);
 			switch (c) {
 			case ADM:
 				printf("(ADM) - ");
