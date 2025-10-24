@@ -85,7 +85,7 @@ int main() {
 		else if (strcmp(cde, "DEMISSION") == 0) { // C5
 			int id;
 			scanf("%d", &id);
-			DEMISSION(&p, id - 1);
+			DEMISSION(&p, id);
 		}
 
 		else if (strcmp(cde, "DEFAILLANCE") == 0) { // C6
