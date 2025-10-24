@@ -34,7 +34,7 @@ int Verifie_id(Promotion* promo, int id); //verifie que l'identifiant utilisateu
 
 void INSCRIRE(Promotion* p, const char* nom, const char* prenom); //initialise une nouvelle valeur etudiant
 void ETUDIANTS(const Promotion* p); //fait defiler la liste des etudiants
-void NOTE(Etudiant* etudiant, int ue, float note);//ajoute la note d'un etudiant pour une UE
+void fNOTE(Etudiant* etudiant, int ue, float note);//ajoute la note d'un etudiant pour une UE
 void CURSUS(Etudiant* etudiant, int id); //permet de voir tout le cursus d'un etudiant donc toutes ses notes depuis la premiere annee
 void DEMISSION(Promotion* p, int id); //change le statut d'un etudiant à demission
 void DEFAILLANCE(Promotion* p, int id); //change le statut d'un etudiant à defaillance
@@ -67,7 +67,7 @@ int main() {
 			else if (strcmp(p.etudiants[nb-1].etat, "en cours") != 0)
 				printf("Etudiant hors formation\n");
 			else
-				NOTE(&p.etudiants[nb-1], competence, note);
+				fNOTE(&p.etudiants[nb-1], competence, note);
 		}
 
 		else if (strcmp(cde, "CURSUS") == 0) {// C3
@@ -156,7 +156,7 @@ void ETUDIANTS(const Promotion* p) {
 }
 
 //ajoute la note d'un etudiant pour une UE
-void NOTE(Etudiant* etudiant, int ue, float note) {
+void fNOTE(Etudiant* etudiant, int ue, float note) {
 	//Verifie si la note et l'UE donner sont correctes (peut-être le mettre dans le main)
 	if (ue < 1 || ue > 6)
 		printf("UE incorrecte\n");
@@ -264,3 +264,8 @@ void DEFAILLANCE(Promotion* p, int id) {
 	printf("Defaillance enregistree\n");
 }
 
+void jury_paire(Promotion* p, Annee semestre) {
+	for (int i = 0; i < p->nbEtudiants; ++i) {
+
+	}
+}
