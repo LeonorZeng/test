@@ -13,7 +13,7 @@ enum {
 const float NOTE_MIN = 0.f, NOTE_MAX = 20.f;
 
 typedef enum { S1, S2, B1, S3, S4, B2, S5, S6, B3 } Annee; //pour definir chaque semestre et annee
-typedef enum { ADM, AJ , AJB, ADC, ADS} Code; //code entre parenthese ¨¤ coter des notes
+typedef enum { ADM, AJ , AJB, ADC, ADS} Code; //code entre parenthese Â¨Â¤ coter des notes
 
 typedef struct {
 	char prenom[MAX_CHAR];
@@ -326,7 +326,7 @@ void jury_1ereAnne(Etudiant *e) {
 
 //jury pour 2eme annee
 void jury_2emeAnne(Etudiant* e) {
-
+	int compte_ADM = 0;
 }
 
 //jury pour 3eme annee
@@ -348,8 +348,6 @@ void jury_paire(Promotion* p, Annee semestre) {
 			case S6:
 				jury_3emeAnne(e);
 				break;
-			}
-			
-
+			}	
 	}
 }
