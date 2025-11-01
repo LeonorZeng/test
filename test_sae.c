@@ -334,46 +334,23 @@ void jury_1ereAnne(Etudiant *e, int* compte_ADM) {
 	}
 }
 
-//jury pour 2eme annee
-void jury_2emeAnne(Etudiant* e, int *compte_ADM) {	
-	int compte_valideB1 = 0;
+int jury_nemeAnne(Etudiant* e, Annee B, int* compte_ADM) {
+	int compte_valide_annee_precedent = 0;
 	float rcue;
 
 	for (int i = 0; i < NB_UE; ++i) {
-		rcue = (e->notes[S3][i] + e->notes[S4][i]) / 2; //calcul note de l'ue pour l'annee
-		e->notes[B2][i] = rcue; //affectation de la note
+		rcue = (e->notes[B-2][i] + e->notes[B-1][i]) / 2;
+		e->notes[B][i] = rcue;
+		*compte_ADM += noteJury(e, B, i, rcue);
 
-		*compte_ADM += noteJury(e, B2, i, rcue);
 		if (rcue > 10) //pour remplir les dettes de l'annee passe si elles existent
-			rattrape_note_de_l_annne_d_avant(e->codes, B1, i);
-		if (e->codes[B1][i]!= AJ) //incremente le compteur de note valide de B1
-			++compte_valideB1;
+			rattrape_note_de_l_annne_d_avant(e->codes, B, i);
 
-	if ((*compte_ADM >= 4 && strcmp(e->statut, "ajourne") != 0)&&compte_valideB1==6)
-		e->ans = S5;
+		if (e->codes[B][i] != AJ)
+			++compte_valide_annee_precedent;
+
 	}
-}
-
-//jury pour 3eme annee
-void jury_3emeAnne(Etudiant* e, int* compte_ADM) {
-	int compte_ADM = 0;
-	int compte_valideB2 = 0;
-	float rcue;
-
-
-	for (int i = 0; i < NB_UE; ++i) {
-		rcue = (e->notes[S3][i] + e->notes[S4][i]) / 2;
-		e->notes[B2][i] = rcue;
-		*compte_ADM += noteJury(e, B2, i, rcue);
-		if (rcue > 10) //pour remplir les dettes de l'annee passe si elles existent
-			rattrape_note_de_l_annne_d_avant(e->codes, B2, i);
-		if (e->codes[B2][i] != AJ)
-			++compte_valideB2;
-
-	if (*compte_ADM == 6 && compte_valideB2 == 6)
-		strcpy(e->statut, "diplome");
-	}
-
+	return compte_valide_annee_precedent;
 }
 
 //jury pour les semestres paires
@@ -381,16 +358,21 @@ void jury_paire(Promotion* p, Annee semestre) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		Etudiant *e = &p->etudiants[i];
 		int compte_ADM = 0;
+		int compte_valide_annee_precedente;
 		if (strcmp(e->statut, "en cours") == 0 && e->ans == semestre){
 			switch (semestre) {
 			case S2:
 				jury_1ereAnne(e, &compte_ADM);
 				break;
 			case S4:
-				jury_2emeAnne(e, &compte_ADM);
+				compte_valide_annee_precedente = jury_nemeAnne(e, B2, &compte_ADM);
+				if ((compte_ADM >= 4 && strcmp(e->statut, "ajourne") != 0) && compte_valide_annee_precedente == 6)
+					e->ans = S5;
 				break;
 			case S6:
-				jury_3emeAnne(e, &compte_ADM);
+				compte_valide_annee_precedente = jury_nemeAnne(e, B3, &compte_ADM);
+				if (compte_ADM == 6 && compte_valide_annee_precedente == 6)
+					strcpy(e->statut, "diplome");
 				break;
 			}	
 		}
