@@ -286,68 +286,113 @@ void defaillance(Promotion* p, int id) {
 	printf("Defaillance enregistree\n");
 }
 
-//change le statut d'un etudiant a ajournee
-void ajournee(Etudiant* e) {
-	strcpy(e->statut, "ajournee");
+//valide les dettes des annees precedentes s'il y a dette s= annee ou il y a la dette
+void rattrape_note_de_l_annne_d_avant(Code* c[], Annee s, int ue) {
+	if (c[s - 2][ue] == AJ)
+		c[s - 2][ue] == ADS;
+	else if (c[s - 1][ue] == AJ)
+		c[s - 1][ue] == ADS;
+	else if (c[s][ue] == AJ)
+		c[s][ue] == ADS;
 }
 
+//ajoute les codes des notes
 int noteJury(Etudiant* e, Annee s, int ue, float rcue) {
 	
 	if (rcue >= 10){
 		e->codes[s][ue] = ADM;
-		if (e->codes[S1][ue] == AJ && rcue > 10)
-			e->codes[S1][ue] == ADC;
-		else if (e->codes[S2][ue] == AJ && rcue > 10)
-			e->codes[S2][ue] == ADC;
+		//fait des tests pour les notes < 10 et > 8 qui pourront etre valider
+		if (e->codes[s-2][ue] == AJ && rcue > 10)
+			e->codes[s - 2][ue] == ADC;
+		else if (e->codes[s - 1][ue] == AJ && rcue > 10)
+			e->codes[s - 1][ue] == ADC;
 		return 1;
 	}
 	else if (8 <= rcue && rcue < 10)
 		e->codes[s][ue] = AJ;
 	else if (rcue < 8) {
 		e->codes[s][ue] = AJB;
-		ajournee(e);
+		//change le statut de l'etudiant car avec une note AJB pas de passage a l'annee d'apres
+		strcpy(e->statut, "ajourne");  
 	}
 	return 0;
 }
 
 //jury pour 1ere annee
-void jury_1ereAnne(Etudiant *e) {
-	int compte_ADM = 0;
+void jury_1ereAnne(Etudiant *e, int* compte_ADM) {
 	float rcue;
-	float *tabNote[] = e->notes;
-	for (int i = 0; i < NB_UE; ++i) {
-		rcue = (tabNote[S1][i] + tabNote[S2][i]) / 2;
-		e->notes[B1][i] = rcue;
-		compte_ADM +=noteJury(e->codes, B1, i, rcue);
-		if (compte_ADM >= 4 && strcmp(e->statut, "ajournee") == 0)
-			e->ans = S3;
+
+	for (int i = 0; i < NB_UE; ++i) { //i = ue
+		rcue = (e->notes[S1][i] + e->notes[S2][i]) / 2; //calcul note de l'ue pour l'annee
+		e->notes[B1][i] = rcue;//affectation de la note
+
+		//incremente le compteur de ADM et affecte les codes aux notes
+		*compte_ADM +=noteJury(e, B1, i, rcue);
+
+	if (*compte_ADM >= 4 && strcmp(e->statut, "ajourne") != 0)
+		e->ans = S3;
 	}
 }
 
 //jury pour 2eme annee
-void jury_2emeAnne(Etudiant* e) {
-	int compte_ADM = 0;
+void jury_2emeAnne(Etudiant* e, int *compte_ADM) {	
+	int compte_valideB1 = 0;
+	float rcue;
+
+	for (int i = 0; i < NB_UE; ++i) {
+		rcue = (e->notes[S3][i] + e->notes[S4][i]) / 2; //calcul note de l'ue pour l'annee
+		e->notes[B2][i] = rcue; //affectation de la note
+
+		*compte_ADM += noteJury(e, B2, i, rcue);
+		if (rcue > 10) //pour remplir les dettes de l'annee passe si elles existent
+			rattrape_note_de_l_annne_d_avant(e->codes, B1, i);
+		if (e->codes[B1][i]!= AJ) //incremente le compteur de note valide de B1
+			++compte_valideB1;
+
+	if ((*compte_ADM >= 4 && strcmp(e->statut, "ajourne") != 0)&&compte_valideB1==6)
+		e->ans = S5;
+	}
 }
 
 //jury pour 3eme annee
-void jury_3emeAnne(Etudiant* e) {
+void jury_3emeAnne(Etudiant* e, int* compte_ADM) {
+	int compte_ADM = 0;
+	int compte_valideB2 = 0;
+	float rcue;
+
+
+	for (int i = 0; i < NB_UE; ++i) {
+		rcue = (e->notes[S3][i] + e->notes[S4][i]) / 2;
+		e->notes[B2][i] = rcue;
+		*compte_ADM += noteJury(e, B2, i, rcue);
+		if (rcue > 10) //pour remplir les dettes de l'annee passe si elles existent
+			rattrape_note_de_l_annne_d_avant(e->codes, B2, i);
+		if (e->codes[B2][i] != AJ)
+			++compte_valideB2;
+
+	if (*compte_ADM == 6 && compte_valideB2 == 6)
+		strcpy(e->statut, "diplome");
+	}
 
 }
 
+//jury pour les semestres paires
 void jury_paire(Promotion* p, Annee semestre) {
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		Etudiant *e = &p->etudiants[i];
-		if (strcmp(e->statut, "en cours") == 0 && e->ans == semestre)
+		int compte_ADM = 0;
+		if (strcmp(e->statut, "en cours") == 0 && e->ans == semestre){
 			switch (semestre) {
 			case S2:
-				jury_1ereAnne(e);
+				jury_1ereAnne(e, &compte_ADM);
 				break;
 			case S4:
-				jury_2emeAnne(e);
+				jury_2emeAnne(e, &compte_ADM);
 				break;
 			case S6:
-				jury_3emeAnne(e);
+				jury_3emeAnne(e, &compte_ADM);
 				break;
 			}	
+		}
 	}
 }
