@@ -13,7 +13,7 @@ enum {
 const float NOTE_MIN = 0.f, NOTE_MAX = 20.f, NOTE_MOY = 10.f, NOTE_LIMITE = 8.f, NOTE_INCONNUE = -1.f;
 
 typedef enum { S1, S2, B1, S3, S4, B2, S5, S6, B3 } Annee; //pour definir chaque semestre et annee
-typedef enum { ADM, AJ , AJB, ADC, ADS} Code; //code entre parenthese a coter des notes
+typedef enum { ADM, AJ, AJB, ADC, ADS } Code; //code entre parenthese a coter des notes
 
 typedef struct {
 	char prenom[MAX_CHAR];
@@ -30,51 +30,55 @@ typedef struct {
 } Promotion;
 
 
-int Verifie_id(Promotion* promo, int id); //Test pour voir si l'etudiant est enregistrer
+int Verifie_id(int nbEtudiants, int id); //Test si l'etudiant est enregistrer
 
-void inscrire(Promotion* p, const char* nom, const char* prenom); //initialise une nouvelle valeur etudiant
-void etudiants(const Promotion* p); //fait defiler la liste des etudiants
-void fnote(Etudiant* etudiant, int ue, float note);//ajoute la note d'un etudiant pour une UE
-void cursus(Etudiant* etudiant, int id); //permet de voir tout le cursus d'un etudiant donc toutes ses notes depuis la premiere annee
-void demission(Promotion* p, int id); //change le statut d'un etudiant ?demission
-void defaillance(Promotion* p, int id); //change le statut d'un etudiant ?defaillance
-void jury(Promotion* p, Annee s);
+void inscrire(Promotion* p, const char* nom, const char* prenom); //initialise un nouveau etudiant
+void etudiants(const Promotion* p); //affiche la liste de tous les etudiants
+void fnote(Etudiant* etudiant, int ue, float note);//ajout une note pour un UE d'un etudiant
+void cursus(Etudiant* etudiant, int id); //affiche toutes les notes d'un etudiant depuis la 1ere annee
+void demission(Promotion* p, int id); //change le statut d'un etudiant a demission
+void defaillance(Promotion* p, int id); //change le statut d'un etudiant a defaillance
+void jury(Promotion* p, Annee s); //juge les notes des etudiants et permet le passage au semestre suivant
 
 int main() {
 	Promotion p;
 	p.nbEtudiants = 0;
 
+	//initialisation variable utile pour la suite
+	int nb, competence, semestre;
+	char nom[MAX_CHAR], prenom[MAX_CHAR];
+	float note;
+
+	//boucle qui appelle les fonctions
 	char cde[MAX_CHAR] = " ";
 	do {
 		scanf("%s", cde);
 		if (strcmp(cde, "INSCRIRE") == 0) { // C1 
-			char nom[MAX_CHAR];
-			char prenom[MAX_CHAR];
 			scanf("%s %s", nom, prenom);
 			inscrire(&p, nom, prenom);
 		}
 
 		else if (strcmp(cde, "NOTE") == 0) { // C2
-			int nb, competence;
-			float note;
-			scanf("%u", &nb);
-			scanf("%u", &competence);
+			scanf("%d", &nb);
+			scanf("%d", &competence);
 			scanf("%f", &note);
+
 			//Test pour voir si l'etudiant est enregistrer
-			if (nb-1 > p.nbEtudiants || nb == p.nbEtudiants+1)
+			if (nb - 1 > p.nbEtudiants || nb == p.nbEtudiants + 1)
 				printf("Identifiant incorrect\n");
 			//Test pour voir si l'etudiant etudit toujours a l'IUT
-			else if (strcmp(p.etudiants[nb-1].statut, "en cours") != 0)
+			else if (strcmp(p.etudiants[nb - 1].statut, "en cours") != 0)
 				printf("Etudiant hors formation\n");
 			else
-				fnote(&p.etudiants[nb-1], competence, note);
+				fnote(&p.etudiants[nb - 1], competence, note);// -1 car tableau commence a 0 et numero etudiant a 1
 		}
 
 		else if (strcmp(cde, "CURSUS") == 0) {// C3
-			int nb;
-			scanf("%u", &nb);
-			if (Verifie_id(&p, nb))
-				cursus(&p.etudiants[nb-1], nb);
+			scanf("%d", &nb);
+
+			//Test pour si l'etudiant enregistr¨¦
+			if (Verifie_id(p.nbEtudiants, nb))
+				cursus(&p.etudiants[nb - 1], nb);
 		}
 
 		else if (strcmp(cde, "ETUDIANTS") == 0) { // C4
@@ -82,22 +86,41 @@ int main() {
 		}
 
 		else if (strcmp(cde, "DEMISSION") == 0) { // C5
-			int id;
-			scanf("%d", &id);
-			demission(&p, id);
+			scanf("%d", &nb);
+
+			//Test pour si l'etudiant enregistr¨¦ et en formation
+			if (Verifie_id(p.nbEtudiants, nb))
+				demission(&p, nb - 1);
 		}
 
 		else if (strcmp(cde, "DEFAILLANCE") == 0) { // C6
-			int id;
-			scanf("%d", &id);
-			defaillance(&p, id);
+			scanf("%d", &nb);
+
+			//Test pour si l'etudiant enregistr¨¦ et en formation
+			if (Verifie_id(p.nbEtudiants, nb))
+					defaillance(&p, nb - 1);
 		}
 
-		else if (strcmp(cde, "JURY") == 0){ // C7
+		else if (strcmp(cde, "JURY") == 0) { // C7
+			scanf("%d", &semestre);
+			Annee s = B1;
 
-		} // TODO
+			// On v¨¦rifie que le semestre rensigner est entre 1~6
+			if (semestre < 1 || semestre > 6)
+				printf("Semestre incorrect\n");
+			else {
+				//pour avoir le semestre qui correspond dans le tableau
+				if (semestre = 2)
+					s = B2;
+				else if (semestre < 5)
+					s = semestre;
+				else
+					s = semestre + 1;
+				jury(&p, s);
+			}
+		}
 
-		else if (strcmp(cde, "BILAN") == 0){ // C8
+		else if (strcmp(cde, "BILAN") == 0) { // C8
 
 		} // TODO
 
@@ -105,18 +128,20 @@ int main() {
 }
 
 //verifie que l'identifiant utilisateur est correct
-int Verifie_id(Promotion* promo, int id) {
-	if ((id < 1 || id > promo->nbEtudiants)){
+int Verifie_id(int nbEtudiants, int id) {
+	if (id < 1 || id > nbEtudiants) {
 		printf("Identifiant incorrect\n");
 		return 0;
 	}
+
 	else
 		return 1;
+
 }
 
 //initilialise le tableau de note d'un etudiant avec la valeur -1
-void Init_tabNotes(Promotion* promo, int nb) {
-	Etudiant* etu = &promo->etudiants[nb];
+void Init_tabNotes(Promotion* promo, int id) {
+	Etudiant* etu = &promo->etudiants[id];
 	for (Annee s = S1; s <= B3; ++s) {
 		for (int i = 0; i < NB_UE; ++i) {
 			etu->notes[s][i] = NOTE_INCONNUE;
@@ -166,7 +191,7 @@ void inscrire(Promotion* p, const char* nom, const char* prenom) {
 		}
 	}
 
-	Etudiant* e = &p->etudiants[p->nbEtudiants];
+	Etudiant* e = &p->etudiants[p->nbEtudiants]; //pointeur etudiant
 
 	strcpy(e->nom, nom);
 	strcpy(e->prenom, prenom);
@@ -187,7 +212,7 @@ void etudiants(const Promotion* p) {
 		const Etudiant* e = &p->etudiants[i];
 		printf("%d - %s %s - ", i + 1, e->nom, e->prenom);
 		affiche_annee(e->ans);
-		printf("%s\n", e->statut );
+		printf("%s\n", e->statut);
 	}
 }
 
@@ -199,19 +224,19 @@ void fnote(Etudiant* etudiant, int ue, float note) {
 	else if (note < NOTE_MIN || note > NOTE_MAX)
 		printf("Note incorrecte\n");
 	else {
-		etudiant->notes[etudiant->ans][ue-1] = note;
+		etudiant->notes[etudiant->ans][ue - 1] = note;
 		printf("Note enregistree\n");
 		//test pour savoir quel code assigner a la note
 		if (note >= NOTE_MOY)
-			etudiant->codes[etudiant->ans][ue-1] = ADM;
+			etudiant->codes[etudiant->ans][ue - 1] = ADM;
 		else if (note < NOTE_MOY)
-			etudiant->codes[etudiant->ans][ue-1] = AJ;
+			etudiant->codes[etudiant->ans][ue - 1] = AJ;
 	}
 }
 
 //permet de voir le cursus d'un etudiant donc toutes ses notes depuis la premiere annee
 void cursus(Etudiant* etudiant, int id) {
-	printf("%u %s %s \n", id, etudiant->nom, etudiant->prenom);
+	printf("%u %s %s\n", id, etudiant->nom, etudiant->prenom);
 	Annee semestre = etudiant->ans;
 	//boucle pour afficher tous les semestres et annees
 	for (Annee s = S1; s <= semestre; ++s) {
@@ -247,22 +272,12 @@ void cursus(Etudiant* etudiant, int id) {
 			}
 		}
 	}
-	printf("%s \n", etudiant->statut);
+	printf("%s\n", etudiant->statut);
 }
 
 //change le statut d'un etudiant a demission
 void demission(Promotion* p, int id) {
-	if (id < 1 || id > p->nbEtudiants) {
-		printf("Identifiant incorrect\n");
-		return;
-	}
-
-	Etudiant* e = &p->etudiants[id - 1]; // -1 car tableau commence a 0 et numero etudiant a 1
-
-	if (strcmp(e->statut, "en cours") != 0) {
-		printf("Etudiant hors formation\n");
-		return;
-	}
+	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
 
 	strcpy(e->statut, "demission");
 	printf("Demission enregistree\n");
@@ -270,12 +285,8 @@ void demission(Promotion* p, int id) {
 
 //change le statut d'un etudiant a defaillance
 void defaillance(Promotion* p, int id) {
-	if (id < 1 || id > p->nbEtudiants) {
-		printf("Identifiant incorrect\n");
-		return;
-	}
 
-	Etudiant* e = &p->etudiants[id - 1]; //pointeur etudiant
+	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
 
 	if (strcmp(e->statut, "en cours") != 0) {
 		printf("Etudiant hors formation\n");
@@ -289,23 +300,23 @@ void defaillance(Promotion* p, int id) {
 //valide les dettes des annees precedentes s'il y a dette s= annee ou il y a la dette
 void rattrape_note_de_l_annne_d_avant(Code* c[], Annee s, int ue) {
 	if (c[s - 2][ue] == AJ)
-		c[s - 2][ue] == ADS;
+		c[s - 2][ue] = ADS;
 	else if (c[s - 1][ue] == AJ)
-		c[s - 1][ue] == ADS;
+		c[s - 1][ue] = ADS;
 	else if (c[s][ue] == AJ)
-		c[s][ue] == ADS;
+		c[s][ue] = ADS;
 }
 
 //ajoute les codes des notes
 int noteJury(Etudiant* e, Annee s, int ue, float rcue) {
-	
-	if (rcue >= NOTE_MOY){
+
+	if (rcue >= NOTE_MOY) {
 		e->codes[s][ue] = ADM;
 		//fait des tests pour les notes < 10 et > 8 qui pourront etre valider
-		if (e->codes[s-2][ue] == AJ && rcue > NOTE_MOY)
-			e->codes[s - 2][ue] == ADC;
+		if (e->codes[s - 2][ue] == AJ && rcue > NOTE_MOY)
+			e->codes[s - 2][ue] = ADC;
 		else if (e->codes[s - 1][ue] == AJ && rcue > NOTE_MOY)
-			e->codes[s - 1][ue] == ADC;
+			e->codes[s - 1][ue] = ADC;
 		return 1;
 	}
 	else if (NOTE_LIMITE <= rcue && rcue < NOTE_MOY)
@@ -313,13 +324,13 @@ int noteJury(Etudiant* e, Annee s, int ue, float rcue) {
 	else if (rcue < NOTE_LIMITE) {
 		e->codes[s][ue] = AJB;
 		//change le statut de l'etudiant car avec une note AJB pas de passage a l'annee d'apres
-		strcpy(e->statut, "ajourne");  
+		strcpy(e->statut, "ajourne");
 	}
 	return 0;
 }
 
 //jury pour 1ere annee
-void jury_1ereAnne(Etudiant *e, int* compte_ADM) {
+void jury_1ereAnne(Etudiant* e, int* compte_ADM) {
 	float rcue;
 
 	for (int i = 0; i < NB_UE; ++i) { //i = ue
@@ -327,10 +338,10 @@ void jury_1ereAnne(Etudiant *e, int* compte_ADM) {
 		e->notes[B1][i] = rcue;//affectation de la note
 
 		//incremente le compteur de ADM et affecte les codes aux notes
-		*compte_ADM +=noteJury(e, B1, i, rcue);
+		*compte_ADM += noteJury(e, B1, i, rcue);
 
-	if (*compte_ADM >= UE_VALIDE_MIN && strcmp(e->statut, "ajourne") != 0)
-		e->ans = S3;
+		if (*compte_ADM >= UE_VALIDE_MIN && strcmp(e->statut, "ajourne") != 0)
+			e->ans = S3;
 	}
 }
 
@@ -339,45 +350,80 @@ int jury_nemeAnne(Etudiant* e, Annee B, int* compte_ADM) {
 	float rcue;
 
 	for (int i = 0; i < NB_UE; ++i) {
-		rcue = (e->notes[B-2][i] + e->notes[B-1][i]) / 2;
+		rcue = (e->notes[B - 2][i] + e->notes[B - 1][i]) / 2;
 		e->notes[B][i] = rcue;
 		*compte_ADM += noteJury(e, B, i, rcue);
 
 		if (rcue > NOTE_MOY) //pour remplir les dettes de l'annee passe si elles existent
 			rattrape_note_de_l_annne_d_avant(e->codes, B, i);
-			
+
 		if (e->codes[B][i] != AJ)
 			++cpt_valide_annee_prec;
 
 	}
-	if (compte_ADM >= UE_VALIDE_MIN && strcmp(e->statut, "ajourne") != 0)
+	if (*compte_ADM >= UE_VALIDE_MIN && strcmp(e->statut, "ajourne") != 0)
 		return cpt_valide_annee_prec;
 	else
 		return 0;
 }
 
 //jury pour les semestres paires
-void jury_paire(Promotion* p, Annee semestre) {
-	for (int i = 0; i < p->nbEtudiants; ++i) {
-		Etudiant *e = &p->etudiants[i];
-		int compte_ADM = 0;
-		int cpt_valide_annee_prec;
-		if (strcmp(e->statut, "en cours") == 0 && e->ans == semestre){
-			switch (semestre) {
-			case 2:
-				jury_1ereAnne(e, &compte_ADM);
-				break;
-			case 4:
-				cpt_valide_annee_prec = jury_nemeAnne(e, B2, &compte_ADM);
-				if (cpt_valide_annee_prec == NB_UE)
-					e->ans = S5;
-				break;
-			case 6:
-				cpt_valide_annee_prec = jury_nemeAnne(e, B3, &compte_ADM);
-				if (compte_ADM == NB_UE && cpt_valide_annee_prec == NB_UE)
-					strcpy(e->statut, "diplome");
-				break;
-			}	
+void jury_pair(Etudiant* e, Annee semestre) {
+	int compte_ADM = 0; //compte le nb de note valider
+	int cpt_valide_annee_prec; //compte_ADM pour annee precedente
+
+	switch (semestre) {
+	case S2:
+		jury_1ereAnne(e, &compte_ADM);
+		break;
+	case S4:
+		cpt_valide_annee_prec = jury_nemeAnne(e, B2, &compte_ADM);
+		if (cpt_valide_annee_prec == NB_UE)
+			e->ans = S5;
+		break;
+	case S6:
+		cpt_valide_annee_prec = jury_nemeAnne(e, B3, &compte_ADM);
+		if (compte_ADM == NB_UE && cpt_valide_annee_prec == NB_UE)
+			strcpy(e->statut, "diplome");
+		break;
+	}
+}
+
+int verifie_si_noteManquante(Promotion* p, Annee s) {
+	int cpt_etu = 0;
+	for (int i = 0; i < p->nbEtudiants; ++i) { //parcours tous les etudiants
+		Etudiant* e = &p->etudiants[i];
+
+		//regarde si l'etudiant en formation et s'il est du semestre demander
+		if (strcmp(e->statut, "en cours") == 0 && e->ans == s)
+			for (int ue = 0; ue < NB_UE; ++ue) // et regarder les ue 
+				if (e->notes[s][ue] == NOTE_INCONNUE) {//pour voir s'il y a une note manquante
+					printf("Des notes sont manquantes\n");
+					return 0;
+				}
+		++cpt_etu;
+	}
+	return cpt_etu;
+}
+void jury(Promotion* p, Annee s) {
+	//initialise des variables dont on a besoin
+	int cpt_etu = verifie_si_noteManquante(p, s);
+
+	if (cpt_etu == 0)
+		return;
+	printf("Semestre termine pour %d etudiant(s)\n", cpt_etu);
+
+	for (int i = 0; i < p->nbEtudiants; ++i) { //parcours tous les etudiants
+		Etudiant* e = &p->etudiants[i];
+
+		if (strcmp(e->statut, "en cours") == 0 && e->ans == s) {
+			// Si le semestre est impair ¡ú appelle jury_impair
+			if (s == S1 || s == S3 || s == S5)
+				e->ans += 1;
+
+			// Si le semestre est pair ¡ú appelle jury_pair
+			else if (s == S2 || s == S4 || s == S6)
+				jury_pair(e, s);
 		}
 	}
 }
