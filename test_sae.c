@@ -35,7 +35,7 @@ int Verifie_id(int nbEtudiants, int id); //Test si l'etudiant est enregistrer
 void inscrire(Promotion* p, const char* nom, const char* prenom); //initialise un nouveau etudiant
 void etudiants(const Promotion* p); //affiche la liste de tous les etudiants
 void fnote(Etudiant* etudiant, int ue, float note);//ajout une note pour un UE d'un etudiant
-void cursus(Etudiant* etudiant, int id); //affiche toutes les notes d'un etudiant depuis la 1ere annee
+void cursus(const Etudiant* etudiant, int id); //affiche toutes les notes d'un etudiant depuis la 1ere annee
 void demission(Promotion* p, int id); //change le statut d'un etudiant a demission
 void defaillance(Promotion* p, int id); //change le statut d'un etudiant a defaillance
 void jury(Promotion* p, Annee s); //juge les notes des etudiants et permet le passage au semestre suivant
@@ -103,18 +103,18 @@ int main() {
 
 		else if (strcmp(cde, "JURY") == 0) { // C7
 			scanf("%d", &semestre);
-			Annee s = B1;
+			Annee s = S1;
 
 			// On v¨¦rifie que le semestre rensigner est entre 1~6
 			if (semestre < 1 || semestre > 6)
 				printf("Semestre incorrect\n");
 			else {
 				//pour avoir le semestre qui correspond dans le tableau
-				if (semestre = 2)
-					s = B2;
-				else if (semestre < 5)
+				if (semestre < NB_UE - 3)
+					s = semestre - 1;
+				else if (semestre < NB_UE - 1)
 					s = semestre;
-				else
+				else if (semestre <= NB_UE)
 					s = semestre + 1;
 				jury(&p, s);
 			}
@@ -183,13 +183,12 @@ void affiche_annee(Annee semestre) {
 }
 
 //initialise une nouvelle valeur etudiant
-void inscrire(Promotion* p, const char* nom, const char* prenom) {
-	for (int i = 0; i < p->nbEtudiants; ++i) {
+void inscrire(Promotion* p, const char *nom, const char *prenom) {
+	for (int i = 0; i < p->nbEtudiants; ++i)
 		if (strcmp(p->etudiants[i].nom, nom) == 0 && strcmp(p->etudiants[i].prenom, prenom) == 0) {
 			printf("Nom incorrect\n");
 			return;
 		}
-	}
 
 	Etudiant* e = &p->etudiants[p->nbEtudiants]; //pointeur etudiant
 
@@ -235,7 +234,7 @@ void fnote(Etudiant* etudiant, int ue, float note) {
 }
 
 //permet de voir le cursus d'un etudiant donc toutes ses notes depuis la premiere annee
-void cursus(Etudiant* etudiant, int id) {
+void cursus(const Etudiant* etudiant, int id) {
 	printf("%u %s %s\n", id, etudiant->nom, etudiant->prenom);
 	Annee semestre = etudiant->ans;
 	//boucle pour afficher tous les semestres et annees
@@ -279,8 +278,13 @@ void cursus(Etudiant* etudiant, int id) {
 void demission(Promotion* p, int id) {
 	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
 
-	strcpy(e->statut, "demission");
-	printf("Demission enregistree\n");
+	if (strcmp(e->statut, "en cours") == 0) {
+		strcpy(e->statut, "demission");
+		printf("Demission enregistree\n");
+	}
+
+	else 
+		printf("Etudiant hors formation\n");
 }
 
 //change le statut d'un etudiant a defaillance
@@ -288,13 +292,14 @@ void defaillance(Promotion* p, int id) {
 
 	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
 
-	if (strcmp(e->statut, "en cours") != 0) {
-		printf("Etudiant hors formation\n");
-		return;
+	if (strcmp(e->statut, "en cours") == 0) {
+		strcpy(e->statut, "defaillance");
+		printf("Defaillance enregistree\n");
 	}
 
-	strcpy(e->statut, "defaillance");
-	printf("Defaillance enregistree\n");
+	else 
+		printf("Etudiant hors formation\n");
+	
 }
 
 //valide les dettes des annees precedentes s'il y a dette s= annee ou il y a la dette
@@ -367,51 +372,33 @@ int jury_nemeAnne(Etudiant* e, Annee B, int* compte_ADM) {
 		return 0;
 }
 
-//jury pour les semestres paires
-void jury_pair(Etudiant* e, Annee semestre) {
-	int compte_ADM = 0; //compte le nb de note valider
-	int cpt_valide_annee_prec; //compte_ADM pour annee precedente
 
-	switch (semestre) {
-	case S2:
-		jury_1ereAnne(e, &compte_ADM);
-		break;
-	case S4:
-		cpt_valide_annee_prec = jury_nemeAnne(e, B2, &compte_ADM);
-		if (cpt_valide_annee_prec == NB_UE)
-			e->ans = S5;
-		break;
-	case S6:
-		cpt_valide_annee_prec = jury_nemeAnne(e, B3, &compte_ADM);
-		if (compte_ADM == NB_UE && cpt_valide_annee_prec == NB_UE)
-			strcpy(e->statut, "diplome");
-		break;
-	}
-}
 
-int verifie_si_noteManquante(Promotion* p, Annee s) {
+int verifie_si_noteManquante(const Promotion* p, Annee s) {
 	int cpt_etu = 0;
-	for (int i = 0; i < p->nbEtudiants; ++i) { //parcours tous les etudiants
-		Etudiant* e = &p->etudiants[i];
+	for (int i = 0; i < p->nbEtudiants; ++i)//parcours tous les etudiants
 
 		//regarde si l'etudiant en formation et s'il est du semestre demander
-		if (strcmp(e->statut, "en cours") == 0 && e->ans == s)
+		if (strcmp(p->etudiants[i].statut, "en cours") == 0 && p->etudiants[i].ans == s) {
 			for (int ue = 0; ue < NB_UE; ++ue) // et regarder les ue 
-				if (e->notes[s][ue] == NOTE_INCONNUE) {//pour voir s'il y a une note manquante
+
+				if (p->etudiants[i].notes[s][ue] == NOTE_INCONNUE) {
+					//pour voir s'il y a une note manquante
 					printf("Des notes sont manquantes\n");
 					return 0;
 				}
-		++cpt_etu;
-	}
+			++cpt_etu;
+		}
 	return cpt_etu;
 }
+
 void jury(Promotion* p, Annee s) {
 	//initialise des variables dont on a besoin
 	int cpt_etu = verifie_si_noteManquante(p, s);
+	if (cpt_etu != 0) {
+		printf("Semestre termine pour %d etudiant(s)\n", cpt_etu);
+	
 
-	if (cpt_etu == 0)
-		return;
-	printf("Semestre termine pour %d etudiant(s)\n", cpt_etu);
 
 	for (int i = 0; i < p->nbEtudiants; ++i) { //parcours tous les etudiants
 		Etudiant* e = &p->etudiants[i];
@@ -421,9 +408,35 @@ void jury(Promotion* p, Annee s) {
 			if (s == S1 || s == S3 || s == S5)
 				e->ans += 1;
 
-			// Si le semestre est pair ¡ú appelle jury_pair
+			/*// Si le semestre est pair ¡ú appelle jury_pair
 			else if (s == S2 || s == S4 || s == S6)
-				jury_pair(e, s);
+				jury_pair(e, s);*/
 		}
 	}
+	}
 }
+
+/*
+void jury(Promotion* p, Annee s) {
+	if (!est_semestre(s)) {
+		printf("Semestre incorrect\n");
+		return;
+	}
+
+	int nb;
+	if (!verif_completude_semestre(p, s, &nb)) {
+
+		return;
+	}
+
+	// Tous complets
+	printf("Semestre termine pour %d etudiant(s)\n", nb);
+
+	if (impair_sem(s)) {
+		jury_impair(p, s);   // avance S1->S2, S3->S4, S5->S6
+	} else {
+		jury_paire(p, s);
+	}
+}
+
+*/
