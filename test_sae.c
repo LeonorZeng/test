@@ -463,7 +463,7 @@ void bilan(const Promotion* p, int annee) {
 		else anneeEtu = 3;
 
 		// S’il n’a pas encore atteint cette année, on l’ignore
-		if (anneeEtu > annee) {
+		if (anneeEtu >= annee) {
 
 			// Maintenant on compte selon le statut
 			if (strcmp(e->statut, "demission") == 0)
