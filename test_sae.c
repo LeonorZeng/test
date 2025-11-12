@@ -39,6 +39,7 @@ void cursus(const Etudiant* etudiant, int id); //affiche toutes les notes d'un e
 void demission(Promotion* p, int id); //change le statut d'un etudiant a demission
 void defaillance(Promotion* p, int id); //change le statut d'un etudiant a defaillance
 void jury(Promotion* p, Annee s,int impair); //juge les notes des etudiants et permet le passage au semestre suivant
+void bilan(const Promotion* p, int annee);
 
 int main() {
 	Promotion p;
@@ -121,7 +122,9 @@ int main() {
 		}
 
 		else if (strcmp(cde, "BILAN") == 0) { // C8
-
+			int annee;
+			scanf("%d", &annee);
+			bilan(&p, annee);
 		} // TODO
 
 	} while (strcmp(cde, "EXIT") != 0); // C0
@@ -437,4 +440,56 @@ void jury(Promotion* p, Annee s, int impair) {
 			}
 		}
 	}
+}
+
+void bilan(const Promotion* p, int annee) {
+	if (annee < 1 || annee > 3) {
+		printf("Annee incorrecte\n");
+		return;
+	}
+
+	int dem = 0, def = 0, encours = 0, aj = 0, passe = 0;
+	printf("BILAN %d\n", annee);
+	//parcours des etudiants
+	for (int i = 0; i < p->nbEtudiants; ++i) {
+		const Etudiant* e = &p->etudiants[i];
+
+		// On détermine à quelle année appartient l’étudiant
+		int anneeEtu = 0;
+		if (e->ans <= B1) 
+			anneeEtu = 1;
+		else if (e->ans <= B2) 
+			anneeEtu = 2;
+		else anneeEtu = 3;
+
+		// S’il n’a pas encore atteint cette année, on l’ignore
+		if (anneeEtu > annee) {
+
+			// Maintenant on compte selon le statut
+			if (strcmp(e->statut, "demission") == 0)
+				if (anneeEtu == annee) 
+					dem++;
+			else if (strcmp(e->statut, "defaillance") == 0)
+				if (anneeEtu == annee) 
+					def++;
+			else if (strcmp(e->statut, "ajourne") == 0)
+				if (anneeEtu == annee) 
+					aj++;
+			else if (strcmp(e->statut, "diplome") == 0) 
+				if (annee == 3) 
+					passe++;
+			else if (strcmp(e->statut, "en cours") == 0) {
+				if (anneeEtu == annee)
+					encours++;
+				else if (anneeEtu > annee)
+					passe++;
+			}
+		}
+	}
+	// On affiche le résultat final
+	printf("%d demission(s)\n", dem);
+	printf("%d defaillance(s)\n", def);
+	printf("%d en cours\n", encours);
+	printf("%d ajourne(s)\n", aj);
+	printf("%d passe(s)\n", passe);
 }
