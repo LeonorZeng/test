@@ -5,13 +5,14 @@
 #include <string.h>
 #pragma warning(disable: 4996 6031)
 
-enum {
-	MAX_ETUDIANTS = 100,
+//cr¨¦er les constantes utilisees dans le programme
+enum {MAX_ETUDIANTS = 100,
 	MAX_CHAR = 31, NB_SEMESTRES = 6,
 	NB_ANNEE = 3, NB_UE = 6, UE_VALIDE_MIN = 4
 };
 const float NOTE_MIN = 0.f, NOTE_MAX = 20.f, NOTE_MOY = 10.f, NOTE_LIMITE = 8.f, NOTE_INCONNUE = -1.f;
 
+//definition de type utilise dans le programme
 typedef enum { S1, S2, B1, S3, S4, B2, S5, S6, B3 } Annee; //pour definir chaque semestre et annee
 typedef enum { ADM, AJ, AJB, ADC, ADS } Code; //code entre parenthese a coter des notes
 
@@ -29,7 +30,7 @@ typedef struct {
 	Etudiant etudiants[MAX_ETUDIANTS];
 } Promotion;
 
-
+//prototype des fonctions 
 int Verifie_id(int nbEtudiants, int id); //Test si l'etudiant est enregistrer
 
 void inscrire(Promotion* p, const char* nom, const char* prenom); //initialise un nouveau etudiant
