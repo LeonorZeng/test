@@ -35,10 +35,10 @@ int Verifie_id(int nbEtudiants, int id); //Test si l'etudiant est enregistrer
 
 void inscrire(Promotion* p, const char* nom, const char* prenom); //initialise un nouveau etudiant
 void etudiants(const Promotion* p); //affiche la liste de tous les etudiants
-void fnote(Etudiant* etudiant, int ue, float note);//ajout une note pour un UE d'un etudiant
-void cursus(const Etudiant* etudiant, int id); //affiche toutes les notes d'un etudiant depuis la 1ere annee
-void demission(Promotion* p, int id); //change le statut d'un etudiant a demission
-void defaillance(Promotion* p, int id); //change le statut d'un etudiant a defaillance
+void fnote(Etudiant* e, int ue, float note);//ajout une note pour un UE d'un etudiant
+void cursus(const Etudiant* e, int id); //affiche toutes les notes d'un etudiant depuis la 1ere annee
+void demission(Etudiant* e, int id); //change le statut d'un etudiant a demission
+void defaillance(Etudiant* e, int id); //change le statut d'un etudiant a defaillance
 void jury(Promotion* p, Annee s,int impair); //juge les notes des etudiants et permet le passage au semestre suivant
 void bilan(const Promotion* p, int annee); //affiche le bilan de l'annee donnee
 
@@ -92,7 +92,7 @@ int main() {
 
 			//Test pour si l'etudiant enregistr¨¦ et en formation
 			if (Verifie_id(p.nbEtudiants, nb))
-				demission(&p, nb - 1);
+				demission(&p.etudiants[nb - 1], nb - 1);
 		}
 
 		else if (strcmp(cde, "DEFAILLANCE") == 0) { // C6
@@ -100,7 +100,7 @@ int main() {
 
 			//Test pour si l'etudiant enregistr¨¦ et en formation
 			if (Verifie_id(p.nbEtudiants, nb))
-					defaillance(&p, nb - 1);
+					defaillance(&p.etudiants[nb - 1], nb - 1);
 		}
 
 		else if (strcmp(cde, "JURY") == 0) { // C7
@@ -153,7 +153,7 @@ void Init_tabNotes(Promotion* promo, int id) {
 }
 
 //affiche les semestres et annees
-void affiche_annee(Annee semestre) {
+void affiche_annee(const Annee semestre) {
 	switch (semestre) {
 	case S1:
 		printf("S1 - ");
@@ -221,8 +221,8 @@ void etudiants(const Promotion* p) {
 }
 
 //ajoute la note d'un etudiant pour une UE
-void fnote(Etudiant* etudiant, int ue, float note) {
-	assert(etudiant->ans >= S1 && B3 >= etudiant->ans);
+void fnote(Etudiant* e, int ue, float note) {
+	assert(e->ans >= S1 && B3 >= e->ans);
 	//Verifie si la note et l'UE donner sont correctes
 	if (ue < 1 || ue > NB_UE)
 		printf("UE incorrecte\n");
@@ -230,28 +230,28 @@ void fnote(Etudiant* etudiant, int ue, float note) {
 		printf("Note incorrecte\n");
 
 	else {
-		etudiant->notes[etudiant->ans][ue - 1] = note;
+		e->notes[e->ans][ue - 1] = note;
 		printf("Note enregistree\n");
 		//test pour savoir quel code assigner a la note
 		if (note >= NOTE_MOY)
-			etudiant->codes[etudiant->ans][ue - 1] = ADM;
+			e->codes[e->ans][ue - 1] = ADM;
 		else if (note < NOTE_MOY)
-			etudiant->codes[etudiant->ans][ue - 1] = AJ;
+			e->codes[e->ans][ue - 1] = AJ;
 	}
 }
 
 //affiche toutes les notes d'un etudiant depuis la 1ere annee
-void cursus(const Etudiant* etudiant, int id) {
-	printf("%u %s %s\n", id, etudiant->nom, etudiant->prenom);
-	Annee semestre = etudiant->ans;
+void cursus(const Etudiant* e, int id) {
+	printf("%u %s %s\n", id, e->nom, e->prenom);
+	Annee semestre = e->ans;
 	//boucle pour afficher tous les semestres et annees
 	for (Annee s = S1; s <= semestre; ++s) {
 		//pour afficher semestre car Annee type enum
 		affiche_annee(s);
 		//parcours les notes par ue et annee
 		for (int i = 0; i < NB_UE; ++i) {
-			float note = etudiant->notes[s][i];
-			Code c = etudiant->codes[s][i];
+			float note = e->notes[s][i];
+			Code c = e->codes[s][i];
 			if (note == -1)
 				printf("* ");
 			else
@@ -280,12 +280,11 @@ void cursus(const Etudiant* etudiant, int id) {
 		if (s != semestre)
 			printf("\n");
 	}
-	printf("%s\n", etudiant->statut);
+	printf("%s\n", e->statut);
 }
 
 //change le statut d'un etudiant a demission
-void demission(Promotion* p, int id) {
-	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
+void demission(Etudiant* e, int id) {
 
 	if (strcmp(e->statut, "en cours") == 0) {
 		strcpy(e->statut, "demission");
@@ -297,8 +296,7 @@ void demission(Promotion* p, int id) {
 }
 
 //change le statut d'un etudiant a defaillance
-void defaillance(Promotion* p, int id) {
-	Etudiant* e = &p->etudiants[id]; //pointeur etudiant
+void defaillance(Etudiant* e, int id) {
 
 	if (strcmp(e->statut, "en cours") == 0) {
 		strcpy(e->statut, "defaillance");
