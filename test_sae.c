@@ -450,9 +450,9 @@ void bilan(const Promotion* p, int annee) {
 		printf("Annee incorrecte\n");
 		return;
 	}
-
 	int dem = 0, def = 0, encours = 0, aj = 0, passe = 0;
 	printf("BILAN %d\n", annee);
+
 	//parcours des etudiants
 	for (int i = 0; i < p->nbEtudiants; ++i) {
 		const Etudiant* e = &p->etudiants[i];
@@ -469,23 +469,27 @@ void bilan(const Promotion* p, int annee) {
 		if (anneeEtu >= annee) {
 
 			// Maintenant on compte selon le statut
-			if (strcmp(e->statut, "demission") == 0)
-				if (anneeEtu == annee) 
-					dem++;
-			else if (strcmp(e->statut, "defaillance") == 0)
-				if (anneeEtu == annee) 
-					def++;
-			else if (strcmp(e->statut, "ajourne") == 0)
-				if (anneeEtu == annee) 
-					aj++;
-			else if (strcmp(e->statut, "diplome") == 0) 
-				if (annee == 3) 
-					passe++;
+			if (strcmp(e->statut, "demission") == 0) {
+				if (anneeEtu == annee)
+					++dem;
+			}
+			else if (strcmp(e->statut, "defaillance") == 0) {
+				if (anneeEtu == annee)
+					++def;
+			}
+			else if (strcmp(e->statut, "ajourne") == 0) {
+				if (anneeEtu == annee)
+					++aj;
+			}
+			else if (strcmp(e->statut, "diplome") == 0) {
+				if (annee == 3)
+					++passe;
+			}
 			else if (strcmp(e->statut, "en cours") == 0) {
 				if (anneeEtu == annee)
-					encours++;
+					++encours;
 				else if (anneeEtu > annee)
-					passe++;
+					++passe;
 			}
 		}
 	}
